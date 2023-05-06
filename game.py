@@ -1,5 +1,4 @@
 import pygame
-import random
 
 from pygame.locals import (
     K_LEFT,
@@ -16,6 +15,8 @@ ballHitEnemy_Sound = pygame.mixer.Sound("soundEffects/enemyHit.wav")
 
 screenWidth = 1200
 screenHeight = 800
+columnWidth = 400
+gameAreaWidth = screenWidth - columnWidth
 
 playerHeight = 15
 playerWidth = 70
@@ -40,7 +41,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.surface
         self.surface.fill(pygame.Color("#E8C547"))
         self.rect = self.surface.get_rect()
-        self.rect.x = ((screenWidth / 2) - (playerWidth / 2))
+        self.rect.x = (gameAreaWidth - playerWidth) // 2
         self.rect.y = (screenHeight - playerHeight) - 10
 
     def updatePlayer(self, pressedKeys):
@@ -50,8 +51,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip((2, 0))
         if self.rect.left <= 0:
             self.rect.left = 0
-        if self.rect.right >= screenWidth:
-            self.rect.right = screenWidth
+        if self.rect.right >= gameAreaWidth:
+            self.rect.right = gameAreaWidth
 
 
 player = Player()
@@ -64,7 +65,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = self.surface
         self.surface.fill(pygame.Color("#FF674D"))
         self.rect = self.surface.get_rect()
-        self.rect.x = ((screenWidth / 2) - (playerWidth / 2))
+        self.rect.x = (gameAreaWidth - enemyWidth) // 2
         self.rect.y = enemyHeight - 10
         self.ball = None
 
@@ -81,8 +82,8 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.move_ip(2, 0)
             if self.rect.left < 0:
                 self.rect.left = 0
-            elif self.rect.right > screenWidth:
-                self.rect.right = screenWidth
+            elif self.rect.right > gameAreaWidth:
+                self.rect.right = gameAreaWidth
 
 
 enemy = Enemy()
@@ -94,12 +95,15 @@ class InternalWalls(pygame.sprite.Sprite):
         self.internalWallsWidth = internalWallsWidth
         self.internalWallsHeight = internalWallsHeight
         self.surface = pygame.Surface((internalWallsWidth, internalWallsHeight))
+        self.rect = self.surface.get_rect()
         self.image = self.surface
         self.surface.fill(pygame.Color("#F0E2A3"))
-        self.rect = self.surface.get_rect(center=(screenWidth // 2, screenHeight // 2))
+        # self.rect.x = (screenWidth - columnWidth - self.internalWallsWidth) // 2
+        # self.rect.y = (screenHeight - self.internalWallsHeight)
+        self.rect = self.surface.get_rect(center=(gameAreaWidth // 2, screenHeight // 2))
 
-    def updateInternalWall(self):
-        pass
+    # def updateInternalWall(self):
+    #     pass
 
 
 internalWalls = InternalWalls()
@@ -114,15 +118,16 @@ class Ball(pygame.sprite.Sprite):
         self.image = self.surface
         pygame.draw.circle(self.surface, pygame.Color("#F6F7EB"), (ballRadius, ballRadius), ballRadius)
         self.rect = self.surface.get_rect()
-        self.rect.x = screenWidth - ballRadius - 10
-        self.rect.y = (screenHeight // 2) - ballRadius
+        self.rect.x = (gameAreaWidth - self.ballDiameter)
+        self.rect.y = (screenHeight - self.ballDiameter) // 2
         self.speed = [1, 1]
-        self.screenWidth = screenWidth
         self.screenHeight = screenHeight
+        self.gameAreaWidth = gameAreaWidth
+
 
     def updateBall(self):
         self.rect.move_ip(self.speed)
-        if self.rect.left < 0 or self.rect.right > screenWidth:
+        if self.rect.left < 0 or self.rect.right > screenWidth or self.rect.right > gameAreaWidth:
             ballHitWall_Sound.play()
             self.speed[0] = -self.speed[0]
         if self.rect.top < 0 or self.rect.bottom > screenHeight:
@@ -158,9 +163,13 @@ while gameRunning:
 
     pressedKeys = pygame.key.get_pressed()
     player.updatePlayer(pressedKeys)
-    screen.blit(ball.surface, ball.rect)
 
-    internalWalls.updateInternalWall()
+    screen.blit(ball.surface, ball.rect)
+    screen.blit(enemy.surface, enemy.rect)
+    screen.blit(ball.surface, ball.rect)
+    screen.blit(internalWalls.surface, internalWalls.rect)
+
+    # internalWalls.updateInternalWall()
 
     ball.updateBall()
     enemy.updateEnemy()
