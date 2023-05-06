@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from pygame.locals import (
     K_LEFT,
@@ -11,6 +12,7 @@ pygame.mixer.init()
 
 ballHitPlayer_Sound = pygame.mixer.Sound("soundEffects/playerHit.wav")
 ballHitWall_Sound = pygame.mixer.Sound("soundEffects/wallHit.wav")
+ballHitEnemy_Sound = pygame.mixer.Sound("soundEffects/enemyHit.wav")
 
 screenWidth = 1200
 screenHeight = 800
@@ -20,6 +22,9 @@ playerWidth = 70
 
 enemyHeight = playerHeight
 enemyWidth = playerWidth
+
+internalWallsHeight = 500
+internalWallsWidth = 2
 
 ballRadius = 8
 
@@ -83,6 +88,23 @@ class Enemy(pygame.sprite.Sprite):
 enemy = Enemy()
 
 
+class InternalWalls(pygame.sprite.Sprite):
+    def __init__(self):
+        super(InternalWalls, self).__init__()
+        self.internalWallsWidth = internalWallsWidth
+        self.internalWallsHeight = internalWallsHeight
+        self.surface = pygame.Surface((internalWallsWidth, internalWallsHeight))
+        self.image = self.surface
+        self.surface.fill(pygame.Color("#F0E2A3"))
+        self.rect = self.surface.get_rect(center=(screenWidth // 2, screenHeight // 2))
+
+    def updateInternalWall(self):
+        pass
+
+
+internalWalls = InternalWalls()
+
+
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
@@ -92,7 +114,7 @@ class Ball(pygame.sprite.Sprite):
         self.image = self.surface
         pygame.draw.circle(self.surface, pygame.Color("#F6F7EB"), (ballRadius, ballRadius), ballRadius)
         self.rect = self.surface.get_rect()
-        self.rect.x = (screenWidth // 2) - ballRadius
+        self.rect.x = screenWidth - ballRadius - 10
         self.rect.y = (screenHeight // 2) - ballRadius
         self.speed = [1, 1]
         self.screenWidth = screenWidth
@@ -101,9 +123,20 @@ class Ball(pygame.sprite.Sprite):
     def updateBall(self):
         self.rect.move_ip(self.speed)
         if self.rect.left < 0 or self.rect.right > screenWidth:
+            ballHitWall_Sound.play()
             self.speed[0] = -self.speed[0]
         if self.rect.top < 0 or self.rect.bottom > screenHeight:
+            ballHitWall_Sound.play()
             self.speed[1] = -self.speed[1]
+        if self.rect.colliderect(player.rect):
+            self.speed[1] = -self.speed[1]
+            ballHitPlayer_Sound.play()
+        if self.rect.colliderect(enemy.rect):
+            self.speed[1] = -self.speed[1]
+            ballHitEnemy_Sound.play()
+        if self.rect.colliderect(internalWalls):
+            self.speed[0] = -self.speed[0]
+            ballHitWall_Sound.play()
 
 
 ball = Ball()
@@ -112,6 +145,7 @@ enemy.setBall(ball)
 allSprites = pygame.sprite.Group()
 allSprites.add(player)
 allSprites.add(enemy)
+allSprites.add(internalWalls)
 allSprites.add(ball)
 
 gameRunning = True
@@ -125,6 +159,8 @@ while gameRunning:
     pressedKeys = pygame.key.get_pressed()
     player.updatePlayer(pressedKeys)
     screen.blit(ball.surface, ball.rect)
+
+    internalWalls.updateInternalWall()
 
     ball.updateBall()
     enemy.updateEnemy()
