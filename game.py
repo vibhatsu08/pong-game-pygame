@@ -47,6 +47,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.surface.get_rect()
         self.rect.x = (gameAreaWidth - playerWidth) // 2
         self.rect.y = (screenHeight - playerHeight)
+        self.score = 0
+        self.lives = 0
 
     def updatePlayer(self, pressedKeys):
         if pressedKeys[K_LEFT]:
@@ -108,6 +110,8 @@ class Ball(pygame.sprite.Sprite):
         self.speed = [1, 1]
         self.screenHeight = screenHeight
         self.gameAreaWidth = gameAreaWidth
+        self.collidingWithPlayer = False
+        self.collidingWithEnemy = False
 
     def updateBall(self):
         self.rect.move_ip(self.speed)
@@ -118,16 +122,27 @@ class Ball(pygame.sprite.Sprite):
             ballHitWall_Sound.play()
             self.speed[1] = -self.speed[1]
         if self.rect.colliderect(player.rect):
+            if not self.collidingWithPlayer:
+                player.score += 1
+                # print(player.score)
+                ballHitPlayer_Sound.play()
             self.speed[1] = -1
-            ballHitPlayer_Sound.play()
+            self.collidingWithPlayer = True
+        else:
+            self.collidingWithPlayer = False
         if self.rect.colliderect(enemy.rect):
-            ballHitEnemy_Sound.play()
+            if not self.collidingWithEnemy:
+                ballHitEnemy_Sound.play()
             options = [-self.speed[0] + random.randint(0, 2), -self.speed[1] + random.randint(0, 2)]
             option = random.randint(0, 1)
             if option == 0:
                 self.speed[0] = options[0]
             elif option == 1:
                 self.speed[1] = options[1]
+            self.collidingWithEnemy = True
+        else:
+            self.collidingWithEnemy = False
+
 
 
 ball = Ball()
