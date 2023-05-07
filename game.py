@@ -5,6 +5,7 @@ from pygame.locals import (
     K_p,
     K_LEFT,
     K_RIGHT,
+    KEYDOWN,
     QUIT
 )
 
@@ -120,7 +121,7 @@ class Ball(pygame.sprite.Sprite):
             ballHitPlayer_Sound.play()
         if self.rect.colliderect(enemy.rect):
             ballHitEnemy_Sound.play()
-            options = [-self.speed[0] + random.randint(1, 2), -self.speed[1] + random.randint(1, 2)]
+            options = [-self.speed[0] + random.randint(0, 2), -self.speed[1] + random.randint(0, 2)]
             option = random.randint(0, 1)
             if option == 0:
                 self.speed[0] = options[0]
@@ -162,20 +163,17 @@ class ScoreBoard(pygame.sprite.Sprite):
 
 scoreBoard = ScoreBoard()
 
-def paused():
-    pausedTextColor = pygame.Color("#FDFFFC")
-    pausedBgColor = pygame.Color("#242325")
-    pausedFont = pygame.font.SysFont("comicsansms", 115)
-    textSurface = pausedFont.render("Paused", True, pausedTextColor)
+paused = False
 
-    pausedTextWindowSurface = pygame.Surface((textSurface.get_width() + 20, textSurface.get_height() + 20))
-    pausedTextWindowSurface.fill(pausedBgColor)
 
-    pausedTextRect = textSurface.get_rect()
-    pausedTextWindowRect = pausedTextWindowSurface.get_rect((gameAreaWidth // 2, screenHeight // 2))
-    pausedTextRect.center = pausedTextWindowRect.center
-    screen.blit(pausedTextWindowSurface, pausedTextWindowRect)
-    screen.blit(textSurface, pausedTextRect)
+def pausedGame():
+    global paused
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_p:
+                    paused = False
 
 
 gameRunning = True
@@ -183,6 +181,9 @@ while gameRunning:
     for event in pygame.event.get():
         if event.type == QUIT:
             gameRunning = False
+        if event.type == KEYDOWN:
+            if event.key == K_p:
+                pausedGame()
 
     screen.fill(screenBgColor)
 
@@ -202,5 +203,6 @@ while gameRunning:
 
     pygame.display.flip()
     pygame.display.update()
+
 
 pygame.quit()
