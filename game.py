@@ -88,25 +88,25 @@ class Enemy(pygame.sprite.Sprite):
 
 enemy = Enemy()
 
-
-class InternalWalls(pygame.sprite.Sprite):
-    def __init__(self):
-        super(InternalWalls, self).__init__()
-        self.internalWallsWidth = internalWallsWidth
-        self.internalWallsHeight = internalWallsHeight
-        self.surface = pygame.Surface((internalWallsWidth, internalWallsHeight))
-        self.rect = self.surface.get_rect()
-        self.image = self.surface
-        self.surface.fill(pygame.Color("#F0E2A3"))
-        # self.rect.x = (screenWidth - columnWidth - self.internalWallsWidth) // 2
-        # self.rect.y = (screenHeight - self.internalWallsHeight)
-        self.rect = self.surface.get_rect(center=(gameAreaWidth // 2, screenHeight // 2))
-
-    # def updateInternalWall(self):
-    #     pass
-
-
-internalWalls = InternalWalls()
+#
+# class InternalWalls(pygame.sprite.Sprite):
+#     def __init__(self):
+#         super(InternalWalls, self).__init__()
+#         self.internalWallsWidth = internalWallsWidth
+#         self.internalWallsHeight = internalWallsHeight
+#         self.surface = pygame.Surface((internalWallsWidth, internalWallsHeight))
+#         self.rect = self.surface.get_rect()
+#         self.image = self.surface
+#         self.surface.fill(pygame.Color("#F0E2A3"))
+#         # self.rect.x = (screenWidth - columnWidth - self.internalWallsWidth) // 2
+#         # self.rect.y = (screenHeight - self.internalWallsHeight)
+#         self.rect = self.surface.get_rect(center=(gameAreaWidth // 2, screenHeight // 2))
+#
+#     # def updateInternalWall(self):
+#     #     pass
+#
+#
+# internalWalls = InternalWalls()
 
 
 class Ball(pygame.sprite.Sprite):
@@ -138,9 +138,9 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.colliderect(enemy.rect):
             self.speed[1] = -self.speed[1] + 1
             ballHitEnemy_Sound.play()
-        if self.rect.colliderect(internalWalls):
-            ballHitWall_Sound.play()
-            self.speed[0] = -self.speed[0]
+        # if self.rect.colliderect(internalWalls):
+        #     ballHitWall_Sound.play()
+        #     self.speed[0] = -self.speed[0]
 
 
 ball = Ball()
@@ -149,7 +149,7 @@ enemy.setBall(ball)
 allSprites = pygame.sprite.Group()
 allSprites.add(player)
 allSprites.add(enemy)
-allSprites.add(internalWalls)
+# allSprites.add(internalWalls)
 allSprites.add(ball)
 
 scoreBoardWidth = 400
@@ -192,7 +192,7 @@ while gameRunning:
     screen.blit(ball.surface, ball.rect)
     screen.blit(enemy.surface, enemy.rect)
     screen.blit(ball.surface, ball.rect)
-    screen.blit(internalWalls.surface, internalWalls.rect)
+    # screen.blit(internalWalls.surface, internalWalls.rect)
 
     scoreBoard.drawBoard(screen)
 
