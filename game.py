@@ -1,6 +1,8 @@
 import pygame
+import random
 
 from pygame.locals import (
+    K_p,
     K_LEFT,
     K_RIGHT,
     QUIT
@@ -76,10 +78,11 @@ class Enemy(pygame.sprite.Sprite):
         if self.ball:
             ballCenter = self.ball.rect.centerx
             enemyCenter = self.rect.centerx
+            ballSpeed = max(abs(self.ball.speed[0]), abs(self.ball.speed[1]))
             if ballCenter < enemyCenter:
-                self.rect.move_ip(-2, 0)
+                self.rect.move_ip(-ballSpeed, 0)
             elif ballCenter > enemyCenter:
-                self.rect.move_ip(2, 0)
+                self.rect.move_ip(ballSpeed, 0)
             if self.rect.left < 0:
                 self.rect.left = 0
             elif self.rect.right > gameAreaWidth:
@@ -87,26 +90,6 @@ class Enemy(pygame.sprite.Sprite):
 
 
 enemy = Enemy()
-
-#
-# class InternalWalls(pygame.sprite.Sprite):
-#     def __init__(self):
-#         super(InternalWalls, self).__init__()
-#         self.internalWallsWidth = internalWallsWidth
-#         self.internalWallsHeight = internalWallsHeight
-#         self.surface = pygame.Surface((internalWallsWidth, internalWallsHeight))
-#         self.rect = self.surface.get_rect()
-#         self.image = self.surface
-#         self.surface.fill(pygame.Color("#F0E2A3"))
-#         # self.rect.x = (screenWidth - columnWidth - self.internalWallsWidth) // 2
-#         # self.rect.y = (screenHeight - self.internalWallsHeight)
-#         self.rect = self.surface.get_rect(center=(gameAreaWidth // 2, screenHeight // 2))
-#
-#     # def updateInternalWall(self):
-#     #     pass
-#
-#
-# internalWalls = InternalWalls()
 
 
 class Ball(pygame.sprite.Sprite):
@@ -136,11 +119,13 @@ class Ball(pygame.sprite.Sprite):
             self.speed[1] = -1
             ballHitPlayer_Sound.play()
         if self.rect.colliderect(enemy.rect):
-            self.speed[1] = -self.speed[1] + 1
             ballHitEnemy_Sound.play()
-        # if self.rect.colliderect(internalWalls):
-        #     ballHitWall_Sound.play()
-        #     self.speed[0] = -self.speed[0]
+            options = [-self.speed[0] + random.randint(1, 2), -self.speed[1] + random.randint(1, 2)]
+            option = random.randint(0, 1)
+            if option == 0:
+                self.speed[0] = options[0]
+            elif option == 1:
+                self.speed[1] = options[1]
 
 
 ball = Ball()
@@ -149,7 +134,6 @@ enemy.setBall(ball)
 allSprites = pygame.sprite.Group()
 allSprites.add(player)
 allSprites.add(enemy)
-# allSprites.add(internalWalls)
 allSprites.add(ball)
 
 scoreBoardWidth = 400
@@ -178,6 +162,22 @@ class ScoreBoard(pygame.sprite.Sprite):
 
 scoreBoard = ScoreBoard()
 
+def paused():
+    pausedTextColor = pygame.Color("#FDFFFC")
+    pausedBgColor = pygame.Color("#242325")
+    pausedFont = pygame.font.SysFont("comicsansms", 115)
+    textSurface = pausedFont.render("Paused", True, pausedTextColor)
+
+    pausedTextWindowSurface = pygame.Surface((textSurface.get_width() + 20, textSurface.get_height() + 20))
+    pausedTextWindowSurface.fill(pausedBgColor)
+
+    pausedTextRect = textSurface.get_rect()
+    pausedTextWindowRect = pausedTextWindowSurface.get_rect((gameAreaWidth // 2, screenHeight // 2))
+    pausedTextRect.center = pausedTextWindowRect.center
+    screen.blit(pausedTextWindowSurface, pausedTextWindowRect)
+    screen.blit(textSurface, pausedTextRect)
+
+
 gameRunning = True
 while gameRunning:
     for event in pygame.event.get():
@@ -192,11 +192,8 @@ while gameRunning:
     screen.blit(ball.surface, ball.rect)
     screen.blit(enemy.surface, enemy.rect)
     screen.blit(ball.surface, ball.rect)
-    # screen.blit(internalWalls.surface, internalWalls.rect)
 
     scoreBoard.drawBoard(screen)
-
-    # internalWalls.updateInternalWall()
 
     ball.updateBall()
     enemy.updateEnemy()
