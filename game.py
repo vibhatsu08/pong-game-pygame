@@ -42,7 +42,7 @@ class Player(pygame.sprite.Sprite):
         self.surface.fill(pygame.Color("#E8C547"))
         self.rect = self.surface.get_rect()
         self.rect.x = (gameAreaWidth - playerWidth) // 2
-        self.rect.y = (screenHeight - playerHeight) - 10
+        self.rect.y = (screenHeight - playerHeight)
 
     def updatePlayer(self, pressedKeys):
         if pressedKeys[K_LEFT]:
@@ -66,7 +66,7 @@ class Enemy(pygame.sprite.Sprite):
         self.surface.fill(pygame.Color("#FF674D"))
         self.rect = self.surface.get_rect()
         self.rect.x = (gameAreaWidth - enemyWidth) // 2
-        self.rect.y = enemyHeight - 10
+        self.rect.y = enemyHeight
         self.ball = None
 
     def setBall(self, ball):
@@ -124,7 +124,6 @@ class Ball(pygame.sprite.Sprite):
         self.screenHeight = screenHeight
         self.gameAreaWidth = gameAreaWidth
 
-
     def updateBall(self):
         self.rect.move_ip(self.speed)
         if self.rect.left < 0 or self.rect.right > screenWidth or self.rect.right > gameAreaWidth:
@@ -134,14 +133,14 @@ class Ball(pygame.sprite.Sprite):
             ballHitWall_Sound.play()
             self.speed[1] = -self.speed[1]
         if self.rect.colliderect(player.rect):
-            self.speed[1] = -self.speed[1]
+            self.speed[1] = -1
             ballHitPlayer_Sound.play()
         if self.rect.colliderect(enemy.rect):
-            self.speed[1] = -self.speed[1]
+            self.speed[1] = -self.speed[1] + 1
             ballHitEnemy_Sound.play()
         if self.rect.colliderect(internalWalls):
-            self.speed[0] = -self.speed[0]
             ballHitWall_Sound.play()
+            self.speed[0] = -self.speed[0]
 
 
 ball = Ball()
@@ -152,6 +151,32 @@ allSprites.add(player)
 allSprites.add(enemy)
 allSprites.add(internalWalls)
 allSprites.add(ball)
+
+scoreBoardWidth = 400
+scoreBoardHeight = screenHeight
+
+
+class ScoreBoard(pygame.sprite.Sprite):
+    def __init__(self):
+        super(ScoreBoard, self).__init__()
+        self.scoreBoardWidth = scoreBoardWidth
+        self.scoreBoardHeight = scoreBoardHeight
+        self.surface = pygame.Surface((scoreBoardWidth, scoreBoardHeight))
+        self.rect = self.surface.get_rect()
+        self.image = self.surface
+        self.surface.fill(pygame.Color("#E2E8CE"))
+        self.rect = self.surface.get_rect(center=(gameAreaWidth + columnWidth // 2, screenHeight // 2))
+
+        self.titleFont = pygame.font.SysFont("Arial", 40)
+        self.titleText = self.titleFont.render("ScoreBoard", True, pygame.Color("#262626"), pygame.Color("#ACBFA4"))
+        self.titleRect = self.titleText.get_rect(center=(gameAreaWidth + columnWidth // 2, 20))
+
+    def drawBoard(self, screen):
+        screen.blit(self.surface, self.rect)
+        screen.blit(self.titleText, self.titleRect)
+
+
+scoreBoard = ScoreBoard()
 
 gameRunning = True
 while gameRunning:
@@ -168,6 +193,8 @@ while gameRunning:
     screen.blit(enemy.surface, enemy.rect)
     screen.blit(ball.surface, ball.rect)
     screen.blit(internalWalls.surface, internalWalls.rect)
+
+    scoreBoard.drawBoard(screen)
 
     # internalWalls.updateInternalWall()
 
