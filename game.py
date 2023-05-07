@@ -3,6 +3,7 @@ import random
 
 from pygame.locals import (
     K_p,
+    K_r,
     K_LEFT,
     K_RIGHT,
     KEYDOWN,
@@ -175,6 +176,20 @@ def pausedGame():
                 if event.key == K_p:
                     paused = False
 
+def restartGame():
+    # reset the ball's parameters
+    ball.rect.x = (gameAreaWidth - ball.ballDiameter)
+    ball.rect.y = (screenHeight - ball.ballDiameter) // 2
+    ball.speed = [1, 1]
+
+    # reset the player's parameters
+    player.rect.x = (gameAreaWidth - playerWidth) // 2
+    player.rect.y = (screenHeight - playerHeight)
+
+    # reset the enemy's parameters
+    enemy.rect.x = (gameAreaWidth - enemyWidth) // 2
+    enemy.rect.y = enemyHeight
+
 
 gameRunning = True
 while gameRunning:
@@ -184,6 +199,9 @@ while gameRunning:
         if event.type == KEYDOWN:
             if event.key == K_p:
                 pausedGame()
+        if event.type == KEYDOWN:
+            if event.key == K_r:
+                restartGame()
 
     screen.fill(screenBgColor)
 
